@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Upload</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+        font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Video Upload</h2>
+        <form id="uploadForm" action="upload.php" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="videoFile">Select Video File:</label>
+                <input type="file" id="videoFile" name="videoFile" accept="video/*" required>
+            </div>
+            <button type="submit">Upload</button>
+        </form>
+        <button onclick="redirectToDashboard()">Go to Dashboard</button>
+    </div>
+    <script >
+        document.addEventListener('DOMContentLoaded', function() {
+        var uploadForm = document.getElementById('uploadForm');
+        var videoFile = document.getElementById('videoFile');
+
+        uploadForm.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent form submission
+
+            // Validate file input
+            if (videoFile.files.length === 0) {
+                alert('Please select a video file.');
+                return;
+            }
+
+            // You can perform additional validation if needed
+
+            // Submit the form (you may want to use AJAX for this)
+            this.submit();
+        });
+        
+    });
+    function redirectToDashboard() {
+    window.location.href = "dashboard.html";
+}
+    </script>
+</body>
+</html>

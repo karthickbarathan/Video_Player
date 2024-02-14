@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+    margin-top: 0;
+}
+
+#videosContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-gap: 20px; /* Add a gap of 20px between the videos */
+}
+
+
+.videoContainer {
+    position: relative;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #fff;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    padding: 10px; /* Add padding around each video */
+}
+
+.videoContainer video {
+    width: 100%;
+    height: auto;
+}
+
+.videoInfo {
+    padding: 10px;
+}
+
+.videoInfo p {
+    margin: 0;
+    font-size: 14px;
+    color: #555;
+}
+.controlsContainer {
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    width: 100%;
+    text-align: center;
+}
+.controlsContainer button {
+    background-color: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    margin: 0 5px;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+.controlsContainer button:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Uploaded Videos</h2>
+        <div id="videosContainer">
+            <!-- Videos will be displayed here -->
+        </div>
+    </div>
+    <script>
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Function to fetch and display videos
+    function fetchAndDisplayVideos() {
+        fetch('get_videos.php')
+            .then(response => response.json())
+            .then(videos => {
+                const videosContainer = document.getElementById('videosContainer');
+                videosContainer.innerHTML = ''; // Clear previous videos
+
+                videos.forEach(video => {
+                    const videoElement = document.createElement('video');
+                    videoElement.src = `data:video/mp4;base64,${video.video_data}`;
+                    videoElement.controls = true;
+
+                    const sourceElement = document.createElement('source');
+                    sourceElement.src = `data:video/mp4;base64,${video.video_data}`;
+                    videoElement.appendChild(sourceElement);
+
+                    const videoNameElement = document.createElement('p');
+                    videoNameElement.textContent = video.video_name;
+
+                    const uploadTimeElement = document.createElement('p');
+                    uploadTimeElement.textContent = `Uploaded at: ${video.upload_time}`;
+
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Delete';
+                    deleteButton.addEventListener('click', function() {
+                        deleteVideo(video.video_name);
+                    });
+
+                    videoElement.addEventListener('loadedmetadata', function() {
+                        const skipBackButton = document.createElement('button');
+                        skipBackButton.textContent = '-5s';
+                        skipBackButton.addEventListener('click', function() {
+                            videoElement.currentTime -= 5; // Skip backward by 5 seconds
+                        });
+
+                        const skipForwardButton = document.createElement('button');
+                        skipForwardButton.textContent = '+5s';
+                        skipForwardButton.addEventListener('click', function() {
+                            videoElement.currentTime += 5; // Skip forward by 5 seconds
+                        });
+
+                        const controlsContainer = document.createElement('div');
+                        controlsContainer.classList.add('controlsContainer');
+                        controlsContainer.appendChild(skipBackButton);
+                        controlsContainer.appendChild(skipForwardButton);
+
+                        videoElement.parentNode.insertBefore(controlsContainer, videoElement.nextSibling);
+                    });
+
+                    const videoContainer = document.createElement('div');
+                    videoContainer.classList.add('videoContainer');
+                    videoContainer.appendChild(videoElement);
+                    videoContainer.appendChild(videoNameElement);
+                    videoContainer.appendChild(uploadTimeElement);
+                    videoContainer.appendChild(deleteButton);
+
+                    videosContainer.appendChild(videoContainer);
+                });
+            })
+            .catch(error => console.error('Error fetching videos:', error));
+    }
+
+    // Function to delete video
+    function deleteVideo(videoName) {
+        if (confirm(`Are you sure you want to delete "${videoName}"?`)) {
+            fetch('delete_video.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ videoName: videoName })
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Refresh videos after successful deletion
+                    fetchAndDisplayVideos();
+                } else {
+                    console.error('Failed to delete video:', response.statusText);
+                }
+            })
+            .catch(error => console.error('Error deleting video:', error));
+        }
+    }
+
+    // Fetch and display videos when the page loads
+    fetchAndDisplayVideos();
+});
+
+
+    </script>
+</body>
+</html>
